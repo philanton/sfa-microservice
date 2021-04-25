@@ -1,10 +1,12 @@
 import motor.motor_asyncio as async_motor
 from typing import Optional
 
-MONGO_DETAILS = "mongodb+srv://admin:1111@fcc.tcj3m.mongodb.net/sfa-models?retryWrites=true&w=majority"
+from server.config import USERNAME, PASSWORD
 
-db = async_motor.AsyncIOMotorClient(MONGO_DETAILS)
+MONGO_DETAILS = "mongodb+srv://{}:{}@fcc.tcj3m.mongodb.net/sfa-models?retryWrites=true&w=majority".format(USERNAME, PASSWORD)
 
+client = async_motor.AsyncIOMotorClient(MONGO_DETAILS)
+db = client["sfa-models"]
 payment_collection = db.get_collection("payments")
 
 
@@ -14,5 +16,5 @@ async def add_payment(payment_data: dict) -> dict:
 
 async def get_payments(type: Optional[str] = None):
     query = {"type": type} if type else type
-    payments = await payment_collection.find(query)
+    payments = await payment_collection.find(query).to_list(length=100)
     return payments
